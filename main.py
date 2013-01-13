@@ -26,11 +26,11 @@ def createParser():
     parser.add_argument(
         '-p', '--pattern', dest='file_pattern_list',
         action='append', type=str, default=['.*\.JPG', '.*\.jpg'],
-        help='Photo file pattern')
+        help='Photo file pattern [default=%(default)s]')
     parser.add_argument(
         '-c', '--config', dest='config_file',
         action='store', type=str, default='config.json',
-        help='Config file')
+        help='Use config file [default=%(default)s]')
     return parser
 
 
@@ -48,8 +48,7 @@ def main():
     dbase = db.Db(args.dir_list, args.file_pattern_list)
     dbase.build()
 
-    #view = mainview.MainView()
-    view = ui.NavUi()
+    view = ui.NavUi(cfg)
 
     controller = ctrl.Controller(cfg, dbase, view)
     controller.populate_view()

@@ -3,9 +3,6 @@ import logging
 import os
 import gfx
 
-DEFAULT_THUMB_WIDTH = 96
-DEFAULT_THUMB_HEIGHT = 96
-
 class NavUi:
   (ICON_VIEW_COL_ID,
    ICON_VIEW_COL_PATH,
@@ -20,8 +17,14 @@ class NavUi:
 
   NAV_UI_FILE = 'nav_ui.glade'
 
-  def __init__(self):
+  def __init__(self, cfg):
+    self.cfg = cfg
     self.log = logging.getLogger('root')
+    self.thumb_width = self.cfg.get_option('thumb_width')
+    self.thumb_height = self.cfg.get_option('thumb_height')
+    self.on_image_open_click_handler = None
+    self.preview_file = None
+
     self._createUi()
     pass
 
@@ -53,12 +56,9 @@ class NavUi:
     thumb_iconview.set_pixbuf_column(self.ICON_VIEW_COL_PIXBUF)
     thumb_iconview.set_text_column(self.ICON_VIEW_COL_DISPLAY_NAME)
 
-    self.on_image_open_click_handler = None
-
     # Preview
     self.preview_scroll = self.builder.get_object('preview_scroll')
     self.preview_img = self.builder.get_object('preview_img')
-    self.preview_file = None
 
     # left_paned
     self.left_paned = self.builder.get_object('left_paned')
@@ -85,11 +85,10 @@ class NavUi:
 
     if a_name is None:
       a_name = ''
-
     if b_name is None:
       b_name = ''
 
-    elif a_name > b_name:
+    if a_name > b_name:
       return 1
     elif a_name < b_name:
       return -1
@@ -218,7 +217,7 @@ class NavUi:
 
   def add_image(self, identifier, filename, displayname):
     pb = GdkPixbuf.Pixbuf.new_from_file_at_size(
-      filename, DEFAULT_THUMB_WIDTH, DEFAULT_THUMB_HEIGHT)
+      filename, self.thumb_width, self.thumb_height)
     if self.auto_orientation_toggleaction.get_active():
       oriented_pb = pb.apply_embedded_orientation()
       pass

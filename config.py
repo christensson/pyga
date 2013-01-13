@@ -5,8 +5,8 @@ import logging
 class Config:
 	DEFAULT_CONFIG = {
 		'open_image_cmd' : 'xdg-open',
-		'thumb_width' : 96,
-		'thumb_height' : 96,
+		'thumb_width' : 128,
+		'thumb_height' : 128,
 	}
 
 	def __init__(self, config_file):
@@ -14,10 +14,10 @@ class Config:
 		self.log = logging.getLogger('root')
 		self.cfg = self._read_config_file()
 		if None is self.cfg:
-			self.log.info('No config file found, creating %s',
+			self.log.info('No config file found, creating default config %s',
 				self.config_file)
 			self.cfg = self.DEFAULT_CONFIG
-			self.save_config(self.DEFAULT_CONFIG)
+			self.save_config(self.cfg)
 			pass
 		pass
 
@@ -29,7 +29,7 @@ class Config:
 				pass
 			pass
 		except IOError as e:
-			self.log.warning('Error opening config file found %s: %s',
+			self.log.warning('Unable to open config file %s: %s',
 				self.config_file, str(e))
 			pass
 		return cfg
@@ -40,17 +40,21 @@ class Config:
 			pass
 		try:
 			with open(self.config_file, 'w') as f:
-				json.dump(cfg, f)
+				json.dump(cfg, f, indent=True)
 				pass
 			pass
 		except IOError as e:
-			self.log.info('Error saving config file %s: %s',
+			self.log.error('Error saving config file %s: %s',
 				self.config_file, str(e))	
 			pass	
 		pass
 
 	def get_option(self, key):
 		if key in self.cfg:
-			return self.cfg[key]
+			value = self.cfg[key]
+			self.log.debug('Read config option: %s = %s',
+				key, str(value))
+			return value
 		else:
+			self.log.error('Config option "%s" not found', key)
 			return None
