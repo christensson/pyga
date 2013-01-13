@@ -194,26 +194,11 @@ class NavUi:
 
   def _reload_preview_image(self):
     if self.preview_file is not None:
-      pb = GdkPixbuf.Pixbuf.new_from_file(self.preview_file)
-      if self.auto_orientation_toggleaction.get_active():
-        oriented_pb = pb.apply_embedded_orientation()
-        pass
-      else:
-        oriented_pb = pb
-        pass
-
       (avail_w, avail_h) = self._get_current_preview_size()
-      full_w = oriented_pb.get_width()
-      full_h = oriented_pb.get_height()
-      wf = full_w / avail_w
-      hf = full_h / avail_h
-      f = max(wf, hf)
-      padding = 2
-      scale_w = (full_w / f) - padding
-      scale_h = (full_h / f) - padding
-      scaled_pb = oriented_pb.scale_simple(
-        scale_w, scale_h, GdkPixbuf.InterpType.BILINEAR)
-      self.preview_img.set_from_pixbuf(scaled_pb)
+      pb = gfx.Util.new_pixbuf_orient_and_scale(
+        self.preview_file, avail_w, avail_h,
+        orient=self.auto_orientation_toggleaction.get_active())
+      self.preview_img.set_from_pixbuf(pb)
       pass
     pass
 
