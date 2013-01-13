@@ -13,6 +13,11 @@
     <property name="stock_id">gtk-zoom-out</property>
     <signal name="activate" handler="on_dec_thumb_size_action_activate" swapped="no"/>
   </object>
+  <object class="GtkAction" id="inc_thumb_size_action">
+    <property name="label" translatable="yes">_Increase thumbnail size</property>
+    <property name="stock_id">gtk-zoom-in</property>
+    <signal name="activate" handler="on_inc_thumb_size_action_activate" swapped="no"/>
+  </object>
   <object class="GtkAction" id="quit_action">
     <property name="label" translatable="yes">_Quit</property>
     <property name="tooltip" translatable="yes">Quit program</property>
@@ -25,11 +30,6 @@
     <property name="draw_as_radio">True</property>
     <property name="active">True</property>
     <signal name="toggled" handler="on_show_preview_toggleaction_toggled" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="inc_thumb_size_action">
-    <property name="label" translatable="yes">_Increase thumbnail size</property>
-    <property name="stock_id">gtk-zoom-in</property>
-    <signal name="activate" handler="on_inc_thumb_size_action_activate" swapped="no"/>
   </object>
   <object class="GtkWindow" id="nav_window">
     <property name="can_focus">False</property>
@@ -149,23 +149,78 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="preview_scroll">
+                  <object class="GtkNotebook" id="notebook1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="window_placement">bottom-left</property>
-                    <property name="shadow_type">in</property>
+                    <property name="tab_pos">bottom</property>
+                    <property name="scrollable">True</property>
                     <child>
-                      <object class="GtkViewport" id="preview_viewport">
+                      <object class="GtkScrolledWindow" id="preview_scroll">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="window_placement">bottom-left</property>
+                        <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkImage" id="preview_img">
+                          <object class="GtkViewport" id="preview_viewport">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="stock">gtk-missing-image</property>
+                            <child>
+                              <object class="GtkImage" id="preview_img">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="stock">gtk-missing-image</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
+                    </child>
+                    <child type="tab">
+                      <object class="GtkLabel" id="Preview">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Preview</property>
+                      </object>
+                      <packing>
+                        <property name="tab_fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow" id="metadata_scroll">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkTreeView" id="metadata_tree">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection"/>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child type="tab">
+                      <object class="GtkLabel" id="Metadata">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="ypad">3</property>
+                        <property name="label" translatable="yes">Metadata</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                        <property name="tab_fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child type="tab">
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -209,9 +264,6 @@
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
     </child>

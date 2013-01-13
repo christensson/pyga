@@ -1,4 +1,5 @@
-from gi.repository import GdkPixbuf
+from gi.repository import GdkPixbuf, GExiv2
+from pprint import pprint
 import logging
 
 class Util:
@@ -34,3 +35,10 @@ class Util:
     scaled_pb = pb.scale_simple(
       scale_w, scale_h, GdkPixbuf.InterpType.BILINEAR)
     return scaled_pb
+
+  @staticmethod
+  def get_exif_data(filename):
+    metadata = GExiv2.Metadata(filename)
+    pprint (metadata.get_tags())
+    pprint (metadata.get_gps_info())
+    pass

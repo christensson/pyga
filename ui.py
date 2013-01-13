@@ -1,4 +1,4 @@
-from gi.repository import Gtk, GdkPixbuf, Gdk
+from gi.repository import Gtk, GdkPixbuf, Gdk, GExiv2
 import logging
 import os
 import gfx
@@ -11,9 +11,13 @@ class NavUi:
    THUMB_LIST_NUM_COLS) = range(5)
 
   (FOLDER_NAV_COL_ID,
-   FOLDER_NAV_NAME,
-   FOLDER_NAV_SELECT_HANDLER,
-   FOLDER_NAV_NUM_VOLS) = range(4)
+   FOLDER_NAV_COL_NAME,
+   FOLDER_NAV_COL_SELECT_HANDLER,
+   FOLDER_NAV_NUM_COLS) = range(4)
+
+  (METADATA_LIST_COL_KEY,
+   METADATA_LIST_COL_VALUE,
+   METADATA_LIST_NUM_COLS) = range(3)
 
   NAV_UI_FILE = 'nav_ui.glade'
 
@@ -46,10 +50,10 @@ class NavUi:
 
     folder_nav_tree = self.builder.get_object('folder_nav_tree')
     folder_nav_tree.set_model(self.folder_nav_store)
-    folder_nav_tree.set_search_column(self.FOLDER_NAV_NAME)
+    folder_nav_tree.set_search_column(self.FOLDER_NAV_COL_NAME)
     folder_nav_tree_renderer = Gtk.CellRendererText()
     folder_nav_tree_column = Gtk.TreeViewColumn(
-      "Views", folder_nav_tree_renderer, text=self.FOLDER_NAV_NAME)
+      "Views", folder_nav_tree_renderer, text=self.FOLDER_NAV_COL_NAME)
     folder_nav_tree.append_column(folder_nav_tree_column)
 
     # Thumbnails view
@@ -65,6 +69,18 @@ class NavUi:
     # Preview
     self.preview_scroll = self.builder.get_object('preview_scroll')
     self.preview_img = self.builder.get_object('preview_img')
+
+    # Metadata
+    self.metadata_liststore = Gtk.ListStore(str, str)
+    metadata_tree = self.builder.get_object('metadata_tree')
+    metadata_tree.set_model(self.metadata_liststore)
+    metadata_tree_renderer = Gtk.CellRendererText()
+    metadata_key_col = Gtk.TreeViewColumn(
+      "Key", metadata_tree_renderer, text=self.METADATA_LIST_COL_KEY)
+    metadata_tree.append_column(metadata_key_col)
+    metadata_value_col = Gtk.TreeViewColumn(
+      "Value", metadata_tree_renderer, text=self.METADATA_LIST_COL_VALUE)
+    metadata_tree.append_column(metadata_value_col)
 
     # left_paned
     self.left_paned = self.builder.get_object('left_paned')
@@ -202,6 +218,16 @@ class NavUi:
       pass
     pass
 
+  def _reload_metadata(self):
+    if self.preview_file is not None:
+      self.metadata_liststore.clear()
+      metadata = GExiv2.Metadata(self.preview_file)
+      for tag in metadata.get_tags():
+        val = metadata.get(tag, '')
+        self.metadata_liststore.append([tag, val])
+      pass
+    pass
+
   def _thumb_item_selection_changed_handler(self, icon_view):
     selection = icon_view.get_selected_items()
     if len(selection) == 1:
@@ -213,6 +239,7 @@ class NavUi:
         self.THUMB_LIST_COL_DISPLAY_NAME)
       self.preview_file = filename
       self._reload_preview_image()
+      self._reload_metadata()
       self.log.debug(
         "Item selected, preview set to %s (id=%s, path=%s)",
         name, identifier, filename)
