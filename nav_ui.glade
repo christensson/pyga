@@ -8,6 +8,17 @@
     <property name="active">True</property>
     <signal name="toggled" handler="on_auto_orientation_toggleaction_toggled" swapped="no"/>
   </object>
+  <object class="GtkAction" id="dec_thumb_size_action">
+    <property name="label" translatable="yes">_Decrease thumbnail size</property>
+    <property name="stock_id">gtk-zoom-out</property>
+    <signal name="activate" handler="on_dec_thumb_size_action_activate" swapped="no"/>
+  </object>
+  <object class="GtkAction" id="quit_action">
+    <property name="label" translatable="yes">_Quit</property>
+    <property name="tooltip" translatable="yes">Quit program</property>
+    <property name="stock_id">gtk-quit</property>
+    <signal name="activate" handler="quit_action_activate_handler" swapped="no"/>
+  </object>
   <object class="GtkToggleAction" id="show_preview_toggleaction">
     <property name="label" translatable="yes">_Show preview</property>
     <property name="tooltip" translatable="yes">Show image preview</property>
@@ -15,11 +26,10 @@
     <property name="active">True</property>
     <signal name="toggled" handler="on_show_preview_toggleaction_toggled" swapped="no"/>
   </object>
-  <object class="GtkAction" id="quit_action">
-    <property name="label" translatable="yes">_Quit</property>
-    <property name="tooltip" translatable="yes">Quit program</property>
-    <property name="stock_id">gtk-quit</property>
-    <signal name="activate" handler="quit_action_activate_handler" swapped="no"/>
+  <object class="GtkAction" id="inc_thumb_size_action">
+    <property name="label" translatable="yes">_Increase thumbnail size</property>
+    <property name="stock_id">gtk-zoom-in</property>
+    <signal name="activate" handler="on_inc_thumb_size_action_activate" swapped="no"/>
   </object>
   <object class="GtkWindow" id="nav_window">
     <property name="can_focus">False</property>
@@ -81,6 +91,24 @@
                         <property name="related_action">auto_orientation_toggleaction</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="inc_thumb_size_menuitem">
+                        <property name="related_action">inc_thumb_size_action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="dec_thumb_size_menuitem">
+                        <property name="related_action">dec_thumb_size_action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
                       </object>
                     </child>
                   </object>

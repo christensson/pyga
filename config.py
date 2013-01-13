@@ -5,8 +5,11 @@ import logging
 class Config:
 	DEFAULT_CONFIG = {
 		'open_image_cmd' : 'xdg-open',
+		'thumb_width_min' : 32,
+		'thumb_height_min' : 32,
 		'thumb_width' : 128,
 		'thumb_height' : 128,
+		'thumb_size_step' : 32,
 	}
 
 	def __init__(self, config_file):

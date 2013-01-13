@@ -4,11 +4,11 @@ import os
 import gfx
 
 class NavUi:
-  (ICON_VIEW_COL_ID,
-   ICON_VIEW_COL_PATH,
-   ICON_VIEW_COL_DISPLAY_NAME,
-   ICON_VIEW_COL_PIXBUF,
-   ICON_VIEW_NUM_COLS) = range(5)
+  (THUMB_LIST_COL_ID,
+   THUMB_LIST_COL_PATH,
+   THUMB_LIST_COL_DISPLAY_NAME,
+   THUMB_LIST_COL_PIXBUF,
+   THUMB_LIST_NUM_COLS) = range(5)
 
   (FOLDER_NAV_COL_ID,
    FOLDER_NAV_NAME,
@@ -20,10 +20,16 @@ class NavUi:
   def __init__(self, cfg):
     self.cfg = cfg
     self.log = logging.getLogger('root')
-    self.thumb_width = self.cfg.get_option('thumb_width')
-    self.thumb_height = self.cfg.get_option('thumb_height')
+
     self.on_image_open_click_handler = None
     self.preview_file = None
+
+    # Read config options
+    self.thumb_width_min = self.cfg.get_option('thumb_width_min')
+    self.thumb_height_min = self.cfg.get_option('thumb_height_min')
+    self.thumb_width = self.cfg.get_option('thumb_width')
+    self.thumb_height = self.cfg.get_option('thumb_height')
+    self.thumb_size_step = self.cfg.get_option('thumb_size_step')
 
     self._createUi()
     pass
@@ -53,8 +59,8 @@ class NavUi:
     self.thumb_liststore.set_sort_column_id(-1, Gtk.SortType.ASCENDING)
     thumb_iconview = self.builder.get_object('thumb_iconview')
     thumb_iconview.set_model(self.thumb_liststore)
-    thumb_iconview.set_pixbuf_column(self.ICON_VIEW_COL_PIXBUF)
-    thumb_iconview.set_text_column(self.ICON_VIEW_COL_DISPLAY_NAME)
+    thumb_iconview.set_pixbuf_column(self.THUMB_LIST_COL_PIXBUF)
+    thumb_iconview.set_text_column(self.THUMB_LIST_COL_DISPLAY_NAME)
 
     # Preview
     self.preview_scroll = self.builder.get_object('preview_scroll')
@@ -75,13 +81,15 @@ class NavUi:
       'on_folder_nav_treeview-selection_changed' : self._folder_nav_tree_selection_changed_handler,
       'on_thumb_iconview_item_activated' : self._thumb_item_activated_handler,
       'on_thumb_iconview_selection_changed' : self._thumb_item_selection_changed_handler,
+      'on_inc_thumb_size_action_activate' : self._inc_thumb_size_action_activate_handler,
+      'on_dec_thumb_size_action_activate' : self._dec_thumb_size_action_activate_handler,
     }
     self.builder.connect_signals(handlers)
     pass
 
   def _sort_thumb_liststore(self, store, a_iter, b_iter, user_data):
-    (a_name) = store.get(a_iter, self.ICON_VIEW_COL_DISPLAY_NAME)
-    (b_name) = store.get(b_iter, self.ICON_VIEW_COL_DISPLAY_NAME)
+    (a_name) = store.get(a_iter, self.THUMB_LIST_COL_DISPLAY_NAME)
+    (b_name) = store.get(b_iter, self.THUMB_LIST_COL_DISPLAY_NAME)
 
     if a_name is None:
       a_name = ''
@@ -130,6 +138,24 @@ class NavUi:
     self._reload_preview_image()
     pass
 
+  def _inc_thumb_size_action_activate_handler(self, action):
+    self.thumb_width = self.thumb_width + self.thumb_size_step
+    self.thumb_height = self.thumb_height + self.thumb_size_step
+    self.log.info("Increased thumbnail with increment %d to %dx%d",
+      self.thumb_size_step, self.thumb_width, self.thumb_height)
+    self._reload_thumbs()
+    pass
+
+  def _dec_thumb_size_action_activate_handler(self, action):
+    self.thumb_width = self.thumb_width - self.thumb_size_step
+    self.thumb_height = self.thumb_height - self.thumb_size_step
+    self.thumb_width = max(self.thumb_width, self.thumb_width_min)
+    self.thumb_height = max(self.thumb_height, self.thumb_height_min)
+    self.log.info("Decreased thumbnail with decrement %d to %dx%d",
+      self.thumb_size_step, self.thumb_width, self.thumb_height)
+    self._reload_thumbs()
+    pass
+
   def _folder_nav_tree_selection_changed_handler(self, selection):
     (model, tree_iter) = selection.get_selected()
     if tree_iter is not None:
@@ -150,8 +176,8 @@ class NavUi:
     iter_ = self.thumb_liststore.get_iter(tree_path)
     (identifier, name) = self.thumb_liststore.get(
       iter_,
-      self.ICON_VIEW_COL_ID,
-      self.ICON_VIEW_COL_DISPLAY_NAME)
+      self.THUMB_LIST_COL_ID,
+      self.THUMB_LIST_COL_DISPLAY_NAME)
     if self.on_image_open_click_handler is not None:
       self.on_image_open_click_handler(identifier, name)
       pass
@@ -197,9 +223,9 @@ class NavUi:
       iter_ = self.thumb_liststore.get_iter(selection[0])
       (identifier, filename, name) = self.thumb_liststore.get(
         iter_,
-        self.ICON_VIEW_COL_ID,
-        self.ICON_VIEW_COL_PATH,
-        self.ICON_VIEW_COL_DISPLAY_NAME)
+        self.THUMB_LIST_COL_ID,
+        self.THUMB_LIST_COL_PATH,
+        self.THUMB_LIST_COL_DISPLAY_NAME)
       self.preview_file = filename
       self._reload_preview_image()
       self.log.debug(
@@ -211,11 +237,7 @@ class NavUi:
       pass
     pass
 
-  def add_image_open_click_handler(self, on_image_open_click_handler):
-    self.on_image_open_click_handler = on_image_open_click_handler
-    pass
-
-  def add_image(self, identifier, filename, displayname):
+  def _load_thumb(self, filename):
     pb = GdkPixbuf.Pixbuf.new_from_file_at_size(
       filename, self.thumb_width, self.thumb_height)
     if self.auto_orientation_toggleaction.get_active():
@@ -224,8 +246,24 @@ class NavUi:
     else:
       oriented_pb = pb
       pass
+    return oriented_pb
+
+  def _reload_thumbs(self):
+    for item in self.thumb_liststore:
+      filename = item[self.THUMB_LIST_COL_PATH]
+      pb = self._load_thumb(filename)
+      item[self.THUMB_LIST_COL_PIXBUF] = pb
+      pass
+    pass
+
+  def add_image_open_click_handler(self, on_image_open_click_handler):
+    self.on_image_open_click_handler = on_image_open_click_handler
+    pass
+
+  def add_image(self, identifier, filename, displayname):
+    pb = self._load_thumb(filename)
     self.thumb_liststore.append(
-      [identifier, filename, displayname, oriented_pb])
+      [identifier, filename, displayname, pb])
     pass
 
   def add_folder(self, identifier, name, on_open_handler):
