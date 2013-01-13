@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkToggleAction" id="auto_orientation_toggleaction">
+    <property name="label" translatable="yes">Enable Auto _Orientation</property>
+    <property name="tooltip" translatable="yes">Read image orientation from EXIF tag</property>
+    <property name="draw_as_radio">True</property>
+    <property name="active">True</property>
+    <signal name="toggled" handler="on_auto_orientation_toggleaction_toggled" swapped="no"/>
+  </object>
+  <object class="GtkToggleAction" id="show_preview_toggleaction">
+    <property name="label" translatable="yes">_Show preview</property>
+    <property name="tooltip" translatable="yes">Show image preview</property>
+    <property name="draw_as_radio">True</property>
+    <property name="active">True</property>
+    <signal name="toggled" handler="on_show_preview_toggleaction_toggled" swapped="no"/>
+  </object>
+  <object class="GtkAction" id="quit_action">
+    <property name="label" translatable="yes">_Quit</property>
+    <property name="tooltip" translatable="yes">Quit program</property>
+    <property name="stock_id">gtk-quit</property>
+    <signal name="activate" handler="quit_action_activate_handler" swapped="no"/>
+  </object>
+  <object class="GtkWindow" id="nav_window">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Photo browser</property>
+    <property name="default_width">800</property>
+    <property name="default_height">800</property>
+    <signal name="destroy" handler="on_nav_window_destroy" swapped="no"/>
+    <child>
+      <object class="GtkBox" id="top_box">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkMenuBar" id="nav_menubar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="nav_file_menuitem">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">_File</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="quit_menuitem">
+                        <property name="related_action">quit_action</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="nav_view_menuitem">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">_View</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkCheckMenuItem" id="show_preview_menuitem">
+                        <property name="related_action">show_preview_toggleaction</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckMenuItem" id="enable_auto_orientation_menuitem">
+                        <property name="related_action">auto_orientation_toggleaction</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkPaned" id="main_paned">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="position">300</property>
+            <property name="position_set">True</property>
+            <child>
+              <object class="GtkPaned" id="left_paned">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkTreeView" id="folder_nav_tree">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection" id="folder_nav_treeview-selection">
+                        <signal name="changed" handler="on_folder_nav_treeview-selection_changed" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="resize">False</property>
+                    <property name="shrink">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="preview_scroll">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="window_placement">bottom-left</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkViewport" id="preview_viewport">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkImage" id="preview_img">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-missing-image</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="resize">True</property>
+                    <property name="shrink">True</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">False</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="thumb_scroll">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkIconView" id="thumb_iconview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="selection_mode">browse</property>
+                    <signal name="selection-changed" handler="on_thumb_iconview_selection_changed" swapped="no"/>
+                    <signal name="item-activated" handler="on_thumb_iconview_item_activated" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
