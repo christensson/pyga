@@ -37,8 +37,32 @@ class Util:
     return scaled_pb
 
   @staticmethod
-  def get_exif_data(filename):
-    metadata = GExiv2.Metadata(filename)
-    pprint (metadata.get_tags())
-    pprint (metadata.get_gps_info())
-    pass
+  def get_exif_metadata(filename):
+    return GExiv2.Metadata(filename)
+
+  @staticmethod
+  def get_tags(metadata):
+    tag_keys = [
+      'Iptc.Application2.Keywords',
+      'Xmp.dc.subject',
+      'Xmp.digiKam.TagsList',
+      'Xmp.lr.hierarchicalSubject',
+      'Xmp.MicrosoftPhoto.LastKeywordXMP',
+      'Xmp.photoshop.SupplementalCategories',
+      'Xmp.digiKam.TagsList',
+    ]
+    tags = []
+    for key in tag_keys:
+      value = metadata.get(key, None)
+      if value is not None:
+        new_tags = value.split(',')
+        for t in new_tags:
+          tag = t.strip(' ')
+          if not tag in tags:
+            tags.append(tag)
+            pass
+          pass
+        pass
+      pass
+    return tags
+

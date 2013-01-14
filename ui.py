@@ -1,4 +1,4 @@
-from gi.repository import Gtk, GdkPixbuf, Gdk, GExiv2
+from gi.repository import Gtk, GdkPixbuf, Gdk
 import logging
 import os
 import gfx
@@ -77,9 +77,11 @@ class NavUi:
     metadata_tree_renderer = Gtk.CellRendererText()
     metadata_key_col = Gtk.TreeViewColumn(
       "Key", metadata_tree_renderer, text=self.METADATA_LIST_COL_KEY)
+    metadata_key_col.set_resizable(True)
     metadata_tree.append_column(metadata_key_col)
     metadata_value_col = Gtk.TreeViewColumn(
       "Value", metadata_tree_renderer, text=self.METADATA_LIST_COL_VALUE)
+    metadata_value_col.set_resizable(True)
     metadata_tree.append_column(metadata_value_col)
 
     # left_paned
@@ -221,11 +223,13 @@ class NavUi:
   def _reload_metadata(self):
     if self.preview_file is not None:
       self.metadata_liststore.clear()
-      metadata = GExiv2.Metadata(self.preview_file)
+      metadata = gfx.Util.get_exif_metadata(self.preview_file)
       for tag in metadata.get_tags():
         val = metadata.get(tag, '')
         self.metadata_liststore.append([tag, val])
       pass
+      tags = gfx.Util.get_tags(metadata)
+      self.log.info("File %s tags: %s", self.preview_file, str(tags))
     pass
 
   def _thumb_item_selection_changed_handler(self, icon_view):
