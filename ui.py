@@ -12,8 +12,7 @@ class NavUi:
 
   (FOLDER_NAV_COL_ID,
    FOLDER_NAV_COL_NAME,
-   FOLDER_NAV_COL_SELECT_HANDLER,
-   FOLDER_NAV_NUM_COLS) = range(4)
+   FOLDER_NAV_NUM_COLS) = range(3)
 
   (METADATA_LIST_COL_KEY,
    METADATA_LIST_COL_VALUE,
@@ -26,6 +25,8 @@ class NavUi:
     self.log = logging.getLogger('root')
 
     self.on_image_open_click_handler = None
+    self.on_folder_open_click_handler = None
+    self.on_exit_handler = None
     self.preview_file = None
 
     # Read config options
@@ -45,8 +46,8 @@ class NavUi:
     self.nav_window = self.builder.get_object('nav_window')
 
     # Folder navigation tree
-    self.folder_nav_store = Gtk.ListStore(str, str, object)
-    self.folder_nav_store.append(["", "None", None])
+    self.folder_nav_store = Gtk.ListStore(str, str)
+    self.folder_nav_store.append(["", "None"])
 
     folder_nav_tree = self.builder.get_object('folder_nav_tree')
     folder_nav_tree.set_model(self.folder_nav_store)
@@ -124,7 +125,12 @@ class NavUi:
 
   def _exit_handler(self, widget):
     self.log.info("User exit requested!")
-    Gtk.main_quit()
+    if self.on_exit_handler is not None:
+      self.on_exit_handler()
+      pass
+    else:
+      self.log.warning("No exit handler installed!")
+      pass
     pass
 
   def _show_preview_toggled_handler(self, toggleaction):
@@ -177,9 +183,9 @@ class NavUi:
   def _folder_nav_tree_selection_changed_handler(self, selection):
     (model, tree_iter) = selection.get_selected()
     if tree_iter is not None:
-      (identifier, name, on_click_handler) = model[tree_iter]
-      if on_click_handler is not None:
-        on_click_handler(identifier, name)
+      (identifier, name) = model[tree_iter]
+      if self.on_folder_open_click_handler is not None:
+        self.on_folder_open_click_handler(identifier, name)
         pass
       else:
         self.log.warning('Folder %s selected, but has no handler!', name)
@@ -272,8 +278,16 @@ class NavUi:
       pass
     pass
 
+  def add_folder_open_click_handler(self, on_folder_open_click_handler):
+    self.on_folder_open_click_handler = on_folder_open_click_handler
+    pass
+
   def add_image_open_click_handler(self, on_image_open_click_handler):
     self.on_image_open_click_handler = on_image_open_click_handler
+    pass
+
+  def add_exit_handler(self, on_exit_handler):
+    self.on_exit_handler = on_exit_handler
     pass
 
   def add_image(self, identifier, filename, displayname):
@@ -282,17 +296,16 @@ class NavUi:
       [identifier, filename, displayname, pb])
     pass
 
-  def add_folder(self, identifier, name, on_open_handler):
-    self.folder_nav_store.append([identifier, name, on_open_handler])
+  def add_folder(self, identifier, name):
+    self.folder_nav_store.append([identifier, name])
     pass
 
   def clear_images(self):
     self.thumb_liststore.clear()
     pass
 
-  def main(self):
+  def show(self):
     self.nav_window.show_all()
-    Gtk.main()
     pass
 
 

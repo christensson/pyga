@@ -1,3 +1,4 @@
+from gi.repository import Gtk
 import logging
 import subprocess
 
@@ -16,20 +17,24 @@ class Controller:
 
     self.view = ui.NavUi(self.cfg)
 
+    self.view.add_folder_open_click_handler(
+      self._on_folder_click_handler)
     self.view.add_image_open_click_handler(
       self._on_image_open_click_handler)
+    self.view.add_exit_handler(
+      self._on_exit_handler)
     pass
 
   def main(self):
     self._show_all_views()
-    self.view.main()
+    self.view.show()
+    Gtk.main()
     pass
 
   def _show_all_views(self):
     self.view.clear_images()
     for viewname in self.dbase.get_view_names():
-      self.view.add_folder(
-        viewname, viewname, self._on_folder_click_handler)
+      self.view.add_folder(viewname, viewname)
       pass
     pass
 
@@ -40,6 +45,10 @@ class Controller:
       item.get_display_name())
     pass        
 
+  def _on_exit_handler(self):
+    Gtk.main_quit()
+    pass
+
   def _on_folder_click_handler(self, identifier, name):
     self.log.debug('Folder %s clicked (id=%s)', name, identifier)
     items = self.dbase.get_view_item_identifiers(identifier)
@@ -49,6 +58,9 @@ class Controller:
         item = self.dbase.get_item_from_id(item_id)
         self._add_image_item(item)
         pass
+      pass
+    else:
+      self.log.warning('Folder %s clicked (id=%s), but not found!', name, identifier)
       pass
     pass
 
