@@ -4,10 +4,7 @@ import argparse
 import logging
 
 import log
-import db
-import ui
 import ctrl
-import config
 
 def createParser():
     parser = argparse.ArgumentParser(description='Python photo gallery')
