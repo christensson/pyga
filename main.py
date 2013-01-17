@@ -43,17 +43,8 @@ def main():
     logger.info('Python photo gallery started!')
     logger.debug('Args: %s', str(args))
 
-    cfg = config.Config(args.config_file)
-
-    dbase = db.Db(args.dir_list, args.file_pattern_list)
-    dbase.build()
-
-    view = ui.NavUi(cfg)
-
-    controller = ctrl.Controller(cfg, dbase, view)
-    controller.populate_view()
-
-    view.main()
+    controller = ctrl.Controller(args)
+    controller.main()
 
 if __name__ == "__main__":
     main()
