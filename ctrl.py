@@ -1,10 +1,12 @@
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 import logging
 import subprocess
+import queue
 
 import db
 import ui
 import config
+import cmd
 
 class Controller:
   def __init__(self, args):
@@ -26,6 +28,7 @@ class Controller:
     pass
 
   def main(self):
+    Gdk.threads_init()
     self._show_all_views()
     self.view.show()
     Gtk.main()
@@ -79,4 +82,3 @@ class Controller:
       pass
     pass
 
-    

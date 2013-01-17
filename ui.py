@@ -1,7 +1,11 @@
 from gi.repository import Gtk, GdkPixbuf, Gdk
+import threading
 import logging
+import queue
+
 import os
 import gfx
+import cmd
 
 class NavUi:
   (THUMB_LIST_COL_ID,
@@ -23,6 +27,8 @@ class NavUi:
   def __init__(self, cfg):
     self.cfg = cfg
     self.log = logging.getLogger('root')
+    self.thumb_load_q = queue.Queue()
+    cmd.GtkCommand.dispatch(self._empty_thumb_load_queue_cmd, None)
 
     self.on_image_open_click_handler = None
     self.on_folder_open_click_handler = None
@@ -278,6 +284,19 @@ class NavUi:
       pass
     pass
 
+  def _empty_thumb_load_queue_cmd(self, data):
+    try:
+      item = self.thumb_load_q.get_nowait()
+      [identifier, filename, displayname] = item
+      pb = self._load_thumb(filename)
+      self.thumb_liststore.append(
+        [identifier, filename, displayname, pb])
+      self.thumb_load_q.task_done()
+      pass
+    except queue.Empty:
+      pass
+    return True
+
   def add_folder_open_click_handler(self, on_folder_open_click_handler):
     self.on_folder_open_click_handler = on_folder_open_click_handler
     pass
@@ -291,9 +310,7 @@ class NavUi:
     pass
 
   def add_image(self, identifier, filename, displayname):
-    pb = self._load_thumb(filename)
-    self.thumb_liststore.append(
-      [identifier, filename, displayname, pb])
+    self.thumb_load_q.put_nowait([identifier, filename, displayname])
     pass
 
   def add_folder(self, identifier, name):
@@ -307,5 +324,3 @@ class NavUi:
   def show(self):
     self.nav_window.show_all()
     pass
-
-
