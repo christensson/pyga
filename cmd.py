@@ -18,7 +18,7 @@ class GtkCommand:
 		pass
 
 	@staticmethod
-	def dispatch(func, data, prio=HIGH_PRIO):
+	def dispatch(func, data=None, prio=HIGH_PRIO):
 		command = GtkCommand(func, data, prio)
 		command._queue()
 		return command

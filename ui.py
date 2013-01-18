@@ -1,7 +1,7 @@
 from gi.repository import Gtk, GdkPixbuf, Gdk
 import threading
 import logging
-import queue
+import collections
 
 import os
 import gfx
@@ -27,8 +27,8 @@ class NavUi:
   def __init__(self, cfg):
     self.cfg = cfg
     self.log = logging.getLogger('root')
-    self.thumb_load_q = queue.Queue()
-    cmd.GtkCommand.dispatch(self._empty_thumb_load_queue_cmd, None)
+    self.thumb_load_q = collections.deque()
+    cmd.GtkCommand.dispatch(self._empty_thumb_load_queue_cmd)
 
     self.on_image_open_click_handler = None
     self.on_folder_open_click_handler = None
@@ -286,14 +286,13 @@ class NavUi:
 
   def _empty_thumb_load_queue_cmd(self, data):
     try:
-      item = self.thumb_load_q.get_nowait()
+      item = self.thumb_load_q.popleft()
       [identifier, filename, displayname] = item
       pb = self._load_thumb(filename)
       self.thumb_liststore.append(
         [identifier, filename, displayname, pb])
-      self.thumb_load_q.task_done()
       pass
-    except queue.Empty:
+    except IndexError: # no element to pop
       pass
     return True
 
@@ -310,7 +309,7 @@ class NavUi:
     pass
 
   def add_image(self, identifier, filename, displayname):
-    self.thumb_load_q.put_nowait([identifier, filename, displayname])
+    self.thumb_load_q.append([identifier, filename, displayname])
     pass
 
   def add_folder(self, identifier, name):
@@ -318,6 +317,7 @@ class NavUi:
     pass
 
   def clear_images(self):
+    self.thumb_load_q.clear()
     self.thumb_liststore.clear()
     pass
 

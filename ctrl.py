@@ -1,7 +1,6 @@
 from gi.repository import Gtk, Gdk
 import logging
 import subprocess
-import queue
 
 import db
 import ui
