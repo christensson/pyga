@@ -35,9 +35,14 @@ class Controller:
 
   def _show_all_views(self):
     self.view.clear_images()
-    for viewname in self.dbase.get_view_names():
-      self.view.add_folder(viewname, viewname)
-      pass
+    for view_item_id in self.dbase.get_view_ids():
+      view_item = self.dbase.get_view_from_id(view_item_id)
+      if view_item is not None:
+        self.view.add_folder(view_item_id, str(view_item))
+        pass
+      else:
+        self.log.error('View item not found, id=%s', view_item_id)
+        pass
     pass
 
   def _add_image_item(self, item):

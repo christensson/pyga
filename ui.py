@@ -52,7 +52,7 @@ class NavUi:
     self.nav_window = self.builder.get_object('nav_window')
 
     # Folder navigation tree
-    self.folder_nav_store = Gtk.ListStore(str, str)
+    self.folder_nav_store = Gtk.ListStore(object, str)
     self.folder_nav_store.append(["", "None"])
 
     folder_nav_tree = self.builder.get_object('folder_nav_tree')

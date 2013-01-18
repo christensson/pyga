@@ -38,7 +38,15 @@ class Util:
 
   @staticmethod
   def get_exif_metadata(filename):
-    return GExiv2.Metadata(filename)
+    metadata = None
+    try:
+      metadata = GExiv2.Metadata(filename)
+    except Exception as e:
+      log = logging.getLogger('root')
+      log.warning('Exception while reading metadata from file %s: %s',
+        filename, str(e))
+      pass
+    return metadata
 
   @staticmethod
   def get_tags(metadata):
@@ -52,14 +60,16 @@ class Util:
       'Xmp.digiKam.TagsList',
     ]
     tags = []
-    for key in tag_keys:
-      value = metadata.get(key, None)
-      if value is not None:
-        new_tags = value.split(',')
-        for t in new_tags:
-          tag = t.strip(' ')
-          if not tag in tags:
-            tags.append(tag)
+    if metadata is not None:
+      for key in tag_keys:
+        value = metadata.get(key, None)
+        if value is not None:
+          new_tags = value.split(',')
+          for t in new_tags:
+            tag = t.strip(' ')
+            if not tag in tags:
+              tags.append(tag)
+              pass
             pass
           pass
         pass
