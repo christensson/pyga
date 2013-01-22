@@ -14,7 +14,7 @@ class NavUi:
    THUMB_LIST_COL_PIXBUF,
    THUMB_LIST_NUM_COLS) = range(5)
 
-  (FOLDER_NAV_COL_ID,
+  (FOLDER_NAV_COL_VIEW_ITEM,
    FOLDER_NAV_COL_NAME,
    FOLDER_NAV_NUM_COLS) = range(3)
 
@@ -30,10 +30,12 @@ class NavUi:
     self.thumb_load_q = collections.deque()
     cmd.GtkCommand.dispatch(self._empty_thumb_load_queue_cmd)
 
+    # Data
     self.on_image_open_click_handler = None
     self.on_folder_open_click_handler = None
     self.on_exit_handler = None
     self.preview_file = None
+    self.folder_group_dict = {}
 
     # Read config options
     self.thumb_width_min = self.cfg.get_option('thumb_width_min')
@@ -52,8 +54,7 @@ class NavUi:
     self.nav_window = self.builder.get_object('nav_window')
 
     # Folder navigation tree
-    self.folder_nav_store = Gtk.ListStore(object, str)
-    self.folder_nav_store.append(["", "None"])
+    self.folder_nav_store = Gtk.TreeStore(object, str)
 
     folder_nav_tree = self.builder.get_object('folder_nav_tree')
     folder_nav_tree.set_model(self.folder_nav_store)
@@ -189,9 +190,14 @@ class NavUi:
   def _folder_nav_tree_selection_changed_handler(self, selection):
     (model, tree_iter) = selection.get_selected()
     if tree_iter is not None:
-      (identifier, name) = model[tree_iter]
+      (view_item, name) = model[tree_iter]
       if self.on_folder_open_click_handler is not None:
-        self.on_folder_open_click_handler(identifier, name)
+        if view_item is not None:
+          self.on_folder_open_click_handler(view_item)
+          pass
+        else:
+          self.log.debug('Folder %s selected, but has no item!', name)
+          pass
         pass
       else:
         self.log.warning('Folder %s selected, but has no handler!', name)
@@ -312,8 +318,23 @@ class NavUi:
     self.thumb_load_q.append([identifier, filename, displayname])
     pass
 
-  def add_folder(self, identifier, name):
-    self.folder_nav_store.append([identifier, name])
+  def add_folder(self, view_item):
+    name = str(view_item)
+    group_id = view_item.get_group_id()
+    parent = None
+    if group_id in self.folder_group_dict:
+      parent = self.folder_group_dict[group_id]
+      pass
+    else:
+      self.log.warning("Group not found (id=%s) when adding item %s (id=%s)",
+        str(group_id), str(view_item), str(view_item.get_id()))
+      pass
+    self.folder_nav_store.append(parent, [view_item, name])
+    pass
+
+  def add_folder_group(self, view_group):
+    tree_iter = self.folder_nav_store.append(None, [None, str(view_group)])
+    self.folder_group_dict[view_group.get_id()] = tree_iter
     pass
 
   def clear_images(self):

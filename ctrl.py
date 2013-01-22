@@ -35,14 +35,12 @@ class Controller:
 
   def _show_all_views(self):
     self.view.clear_images()
-    for view_item_id in self.dbase.get_view_ids():
-      view_item = self.dbase.get_view_from_id(view_item_id)
-      if view_item is not None:
-        self.view.add_folder(view_item_id, str(view_item))
-        pass
-      else:
-        self.log.error('View item not found, id=%s', view_item_id)
-        pass
+    for view_group in self.dbase.get_view_groups():
+      self.view.add_folder_group(view_group)
+      pass
+    for view_item in self.dbase.get_views():
+      self.view.add_folder(view_item)
+      pass
     pass
 
   def _add_image_item(self, item):
@@ -56,9 +54,9 @@ class Controller:
     Gtk.main_quit()
     pass
 
-  def _on_folder_click_handler(self, identifier, name):
-    self.log.debug('Folder %s clicked (id=%s)', name, identifier)
-    items = self.dbase.get_view_item_identifiers(identifier)
+  def _on_folder_click_handler(self, view_item):
+    self.log.debug('Folder %s clicked (id=%s)', str(view_item), view_item.get_id())
+    items = view_item.get_item_ids()
     if items is not None:
       self.view.clear_images()
       for item_id in items:
@@ -67,7 +65,8 @@ class Controller:
         pass
       pass
     else:
-      self.log.warning('Folder %s clicked (id=%s), but not found!', name, identifier)
+      self.log.warning('Folder %s clicked (id=%s), but not found!',
+        str(view_item), view_item.get_id())
       pass
     pass
 

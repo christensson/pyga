@@ -134,17 +134,24 @@
                 <property name="can_focus">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="folder_nav_tree">
+                  <object class="GtkScrolledWindow" id="folder_scroll">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="folder_nav_treeview-selection">
-                        <signal name="changed" handler="on_folder_nav_treeview-selection_changed" swapped="no"/>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTreeView" id="folder_nav_tree">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="folder_nav_treeview-selection">
+                            <signal name="changed" handler="on_folder_nav_treeview-selection_changed" swapped="no"/>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
                   <packing>
-                    <property name="resize">False</property>
+                    <property name="resize">True</property>
                     <property name="shrink">True</property>
                   </packing>
                 </child>

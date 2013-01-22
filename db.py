@@ -27,40 +27,49 @@ class DbItem:
     def get_view_ids(self):
         return self.view_ids
 
+    def __str__(self):
+        return self.get_display_name()
+
+class ViewGroup:
+    def __init__(self, group_name):
+        self.id = uuid.uuid4()
+        self.name = group_name
+        pass
+
+    def __str__(self):
+        return self.name
+
+    def get_id(self):
+        return self.id
+
 class ViewItem:
-    VIEW_TYPE_FOLDER = 0
-    VIEW_TYPE_TAG = 1
-    VIEW_TYPE_ALL = 2
-
     @staticmethod
-    def new_folder_view(path, newest_date=None, oldest_date=None):
-        view_type = ViewItem.VIEW_TYPE_FOLDER
-        identity = path + str(view_type)
+    def new_folder_view(view_group, path, newest_date=None, oldest_date=None):
+        identity = path + str(view_group.get_id())
         viewname = os.path.split(path)[1]
-        view = ViewItem(identity, viewname, path, view_type, newest_date, oldest_date)
+        view = ViewItem(identity, viewname, path, view_group, newest_date, oldest_date)
         return view
 
     @staticmethod
-    def new_tag_view(tag, newest_date=None, oldest_date=None):
-        view_type = ViewItem.VIEW_TYPE_TAG
-        identity = tag + str(view_type)
-        viewname = '#' + tag
-        view = ViewItem(identity, viewname, None, view_type, newest_date, oldest_date)
+    def new_tag_view(view_group, tag, newest_date=None, oldest_date=None):
+        identity = tag + str(view_group.get_id())
+        viewname = tag
+        view = ViewItem(identity, viewname, None, view_group, newest_date, oldest_date)
         return view
 
     @staticmethod
-    def new_all_view(identity, newest_date=None, oldest_date=None):
-        viewname = '*' + VIEW_NAME_ALL
-        view = ViewItem(identity, viewname, None, ViewItem.VIEW_TYPE_ALL, newest_date, oldest_date)
+    def new_all_view(view_group, identity, newest_date=None, oldest_date=None):
+        viewname = VIEW_NAME_ALL
+        view = ViewItem(identity, viewname, None, view_group, newest_date, oldest_date)
         return view
 
-    def __init__(self, identity, viewname, path, view_type, newest_date=None, oldest_date=None):
+    def __init__(self, identity, viewname, path, view_group, newest_date=None, oldest_date=None):
         self.log = logging.getLogger('root')
         self.identity = identity
         self.viewname = viewname
         self.newest_date = newest_date
         self.oldest_date = oldest_date
-        self.type = view_type
+        self.view_group = view_group
         self.items = []
         pass
 
@@ -100,8 +109,12 @@ class ViewItem:
     def get_id(self):
         return self.identity
 
+    def get_group_id(self):
+        return self.view_group.get_id()
+
 class Db:
     ALL_VIEW_NAME = 'all'
+    NONE_VIEW_NAME = 'none'
 
     def __init__(self, dir_list, file_pattern_list):
         self.dir_list = dir_list
@@ -109,12 +122,16 @@ class Db:
         self.log = logging.getLogger('root')
         self.item_dict = {}
         self.view_dict = {}
+        self.view_group_dict = {}
+        self.view_group_dict['folders'] = ViewGroup("Folders")
+        self.view_group_dict['tags'] = ViewGroup("Tags")
+        self.view_group_dict['misc'] = ViewGroup("Misc")
         self.all_view_id = self._get_new_id()
         self._init_view_dict()
         pass
 
     def _init_view_dict(self):
-        view = ViewItem.new_all_view(self.all_view_id)
+        view = ViewItem.new_all_view(self.view_group_dict['misc'], self.all_view_id)
         self.view_dict[self.all_view_id] = view
         pass
 
@@ -122,7 +139,7 @@ class Db:
         return self.view_dict[self.all_view_id]
 
     def _get_folder_view(self, path):
-        view = ViewItem.new_folder_view(path)
+        view = ViewItem.new_folder_view(self.view_group_dict['folders'], path)
         view_id = view.get_id()
         if view_id not in self.view_dict:
             self.view_dict[view_id] = view
@@ -133,7 +150,7 @@ class Db:
         return view
 
     def _get_tag_view(self, tag):
-        view = ViewItem.new_tag_view(tag)
+        view = ViewItem.new_tag_view(self.view_group_dict['tags'], tag)
         view_id = view.get_id()
         if view_id not in self.view_dict:
             self.view_dict[view_id] = view
@@ -226,6 +243,12 @@ class Db:
 
     def get_view_dict(self):
         return self.view_dict
+
+    def get_views(self):
+        return self.view_dict.values()
+
+    def get_view_groups(self):
+        return self.view_group_dict.values()
 
     def get_view_ids(self):
         return self.view_dict.keys()
