@@ -38,11 +38,11 @@ class NavUi:
     self.folder_group_dict = {}
 
     # Read config options
-    self.thumb_width_min = self.cfg.get_option('thumb_width_min')
-    self.thumb_height_min = self.cfg.get_option('thumb_height_min')
-    self.thumb_width = self.cfg.get_option('thumb_width')
-    self.thumb_height = self.cfg.get_option('thumb_height')
-    self.thumb_size_step = self.cfg.get_option('thumb_size_step')
+    self.thumb_width_min = self.cfg.thumb_width_min
+    self.thumb_height_min = self.cfg.thumb_height_min
+    self.thumb_width = self.cfg.thumb_width
+    self.thumb_height = self.cfg.thumb_height
+    self.thumb_size_step = self.cfg.thumb_size_step
 
     self._createUi()
     pass

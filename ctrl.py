@@ -13,7 +13,7 @@ class Controller:
     self.args = args
     self.cfg = config.Config(self.args.config_file)
     
-    file_pattern_list = self.cfg.get_option('file_pattern_list')
+    file_pattern_list = self.cfg.file_pattern_list
     self.dbase = db.Db(self.args.dir_list, file_pattern_list)
     self.dbase.build()
 
@@ -75,7 +75,7 @@ class Controller:
     item = self.dbase.get_item_from_id(identifier)
     if None is not item:
       path = item.get_full_path()
-      cmd = [self.cfg.get_option('open_image_cmd'), path]
+      cmd = [self.cfg.open_image_cmd, path]
       self.log.info('Opening image %s (id=%s, path=%s) with command=%s',
         name, identifier, path, str(cmd))
       subprocess.call(cmd)
