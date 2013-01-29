@@ -10,6 +10,7 @@ class Config:
     'thumb_width' : 128,
     'thumb_height' : 128,
     'thumb_size_step' : 32,
+    'file_pattern_list' : ['.*\.JPG$', '.*\.jpg$'],
   }
 
   def __init__(self, config_file):

@@ -12,8 +12,9 @@ class Controller:
     self.log = logging.getLogger('root')
     self.args = args
     self.cfg = config.Config(self.args.config_file)
-
-    self.dbase = db.Db(self.args.dir_list, self.args.file_pattern_list)
+    
+    file_pattern_list = self.cfg.get_option('file_pattern_list')
+    self.dbase = db.Db(self.args.dir_list, file_pattern_list)
     self.dbase.build()
 
     self.view = ui.NavUi(self.cfg)

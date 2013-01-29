@@ -21,10 +21,6 @@ def createParser():
         action='append', type=str, required=True,
         help='Directory to search for photos')
     parser.add_argument(
-        '-p', '--pattern', dest='file_pattern_list',
-        action='append', type=str, default=['.*\.JPG$', '.*\.jpg$'],
-        help='Photo file pattern [default=%(default)s]')
-    parser.add_argument(
         '-c', '--config', dest='config_file',
         action='store', type=str, default='config.json',
         help='Use config file [default=%(default)s]')
