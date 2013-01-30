@@ -56,7 +56,9 @@ class Controller:
     pass
 
   def _on_folder_click_handler(self, view_item):
-    self.log.debug('Folder %s clicked (id=%s)', str(view_item), view_item.get_id())
+    self.log.debug('Folder %s clicked (id=%s), newest_date=%s',
+                   str(view_item), view_item.get_id(),
+                   str(view_item.get_newest_date()))
     items = view_item.get_item_ids()
     if items is not None:
       self.view.clear_images()

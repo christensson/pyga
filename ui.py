@@ -6,17 +6,20 @@ import collections
 import os
 import gfx
 import cmd
+import datetime
 
 class NavUi:
   (THUMB_LIST_COL_ID,
    THUMB_LIST_COL_PATH,
    THUMB_LIST_COL_DISPLAY_NAME,
    THUMB_LIST_COL_PIXBUF,
-   THUMB_LIST_NUM_COLS) = range(5)
+   THUMB_LIST_COL_DATE,
+   THUMB_LIST_NUM_COLS) = range(6)
 
   (FOLDER_NAV_COL_VIEW_ITEM,
    FOLDER_NAV_COL_NAME,
-   FOLDER_NAV_NUM_COLS) = range(3)
+   FOLDER_NAV_COL_DATE,
+   FOLDER_NAV_NUM_COLS) = range(4)
 
   (METADATA_LIST_COL_KEY,
    METADATA_LIST_COL_VALUE,
@@ -43,6 +46,24 @@ class NavUi:
     self.thumb_width = self.cfg.thumb_width
     self.thumb_height = self.cfg.thumb_height
     self.thumb_size_step = self.cfg.thumb_size_step
+    if self.cfg.folder_sort_order == self.cfg.SORT_ORDER_ASCENDING:
+        self.folder_sort_order = Gtk.SortType.ASCENDING
+        pass
+    else:
+        self.folder_sort_order = Gtk.SortType.DESCENDING
+        pass
+    self.folder_sort_date_newest = False
+    if self.cfg.folder_sort_type == self.cfg.FOLDER_SORT_TYPE_NEWEST_DATE:
+        self.folder_sort_col = self.FOLDER_NAV_COL_DATE
+        self.folder_sort_date_newest = True
+        pass
+    elif self.cfg.folder_sort_type == self.cfg.FOLDER_SORT_TYPE_OLDEST_DATE:
+        self.folder_sort_col = self.FOLDER_NAV_COL_DATE
+        self.folder_sort_date_newest = False
+        pass
+    else:
+        self.folder_sort_col = self.FOLDER_NAV_COL_DATE
+        pass
 
     self._createUi()
     pass
@@ -54,7 +75,9 @@ class NavUi:
     self.nav_window = self.builder.get_object('nav_window')
 
     # Folder navigation tree
-    self.folder_nav_store = Gtk.TreeStore(object, str)
+    self.folder_nav_store = Gtk.TreeStore(object, str, object)
+    self.folder_nav_store.set_default_sort_func(self._sort_folder_liststore)
+    self.folder_nav_store.set_sort_column_id(-1, self.folder_sort_order)
 
     folder_nav_tree = self.builder.get_object('folder_nav_tree')
     folder_nav_tree.set_model(self.folder_nav_store)
@@ -113,6 +136,20 @@ class NavUi:
     self.builder.connect_signals(handlers)
     pass
 
+  def _sort_folder_liststore(self, store, row1, row2, user_data):
+    value1 = store.get_value(row1, self.folder_sort_col)
+    value2 = store.get_value(row2, self.folder_sort_col)
+    if value1 is None:
+        return -1
+    elif value2 is None:
+        return 1
+    elif value1 < value2:
+        return -1
+    elif value1 == value2:
+        return 0
+    else:
+        return 1
+    
   def _sort_thumb_liststore(self, store, a_iter, b_iter, user_data):
     (a_name) = store.get(a_iter, self.THUMB_LIST_COL_DISPLAY_NAME)
     (b_name) = store.get(b_iter, self.THUMB_LIST_COL_DISPLAY_NAME)
@@ -190,7 +227,7 @@ class NavUi:
   def _folder_nav_tree_selection_changed_handler(self, selection):
     (model, tree_iter) = selection.get_selected()
     if tree_iter is not None:
-      (view_item, name) = model[tree_iter]
+      (view_item, name, date) = model[tree_iter]
       if self.on_folder_open_click_handler is not None:
         if view_item is not None:
           self.on_folder_open_click_handler(view_item)
@@ -320,6 +357,12 @@ class NavUi:
 
   def add_folder(self, view_item):
     name = str(view_item)
+    if self.folder_sort_date_newest:
+        date = view_item.get_newest_date()
+        pass
+    else:
+        date = view_item.get_oldest_date()
+        pass
     group_id = view_item.get_group_id()
     parent = None
     if group_id in self.folder_group_dict:
@@ -329,11 +372,11 @@ class NavUi:
       self.log.warning("Group not found (id=%s) when adding item %s (id=%s)",
         str(group_id), str(view_item), str(view_item.get_id()))
       pass
-    self.folder_nav_store.append(parent, [view_item, name])
+    self.folder_nav_store.append(parent, [view_item, name, date])
     pass
 
   def add_folder_group(self, view_group):
-    tree_iter = self.folder_nav_store.append(None, [None, str(view_group)])
+    tree_iter = self.folder_nav_store.append(None, [None, str(view_group), None])
     self.folder_group_dict[view_group.get_id()] = tree_iter
     pass
 

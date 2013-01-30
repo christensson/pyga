@@ -8,10 +8,11 @@ import gfx
 VIEW_NAME_ALL = 'all'
 
 class DbItem:
-    def __init__(self, identity, filename, dirname, view_ids):
+    def __init__(self, identity, filename, dirname, original_date, view_ids):
         self.identity = identity
-        self.dirname = dirname
         self.filename = filename
+        self.dirname = dirname
+        self.original_date = original_date
         self.view_ids = view_ids
         pass
 
@@ -23,6 +24,9 @@ class DbItem:
     
     def get_display_name(self):
         return self.filename
+    
+    def get_original_date(self):
+        return self.original_date
 
     def get_view_ids(self):
         return self.view_ids
@@ -102,6 +106,12 @@ class ViewItem:
         elif date > self.newest_date:
             self.newest_date = date
             pass
+        
+    def get_newest_date(self):
+        return self.newest_date
+
+    def get_oldest_date(self):
+        return self.oldest_date
 
     def __str__(self):
         return self.viewname
@@ -207,6 +217,7 @@ class Db:
         path = os.path.join(dirname, filename)
         metadata = gfx.Util.get_exif_metadata(path)
         tags = gfx.Util.get_tags(metadata)
+        original_date = gfx.Util.get_date_original(metadata)
         views = []
         views.append(self._get_all_view())
         views.append(dir_view)
@@ -220,7 +231,7 @@ class Db:
             view_ids.append(v.get_id())
             pass
         
-        item = DbItem(item_id, filename, dirname, view_ids)
+        item = DbItem(item_id, filename, dirname, original_date, view_ids)
         self.item_dict[item_id] = item
         self.log.spam('Adding file %s (id=%s, views=%s)',
                       os.path.join(dirname, filename),
@@ -228,6 +239,7 @@ class Db:
                       str(views))
         for v in views:
             v.add_item_id(item_id)
+            v.add_date(original_date)
             pass
         pass
 

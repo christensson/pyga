@@ -3,6 +3,11 @@ import os
 import logging
 
 class Config:
+    FOLDER_SORT_TYPE_NEWEST_DATE = 'newest_date'
+    FOLDER_SORT_TYPE_OLDEST_DATE = 'oldest_date'
+    SORT_ORDER_ASCENDING = 'ascending'
+    SORT_ORDER_DESCENDING = 'descending'
+    
     DEFAULT_CONFIG = {
         'open_image_cmd' : 'xdg-open',
         'thumb_width_min' : 32,
@@ -11,6 +16,8 @@ class Config:
         'thumb_height' : 128,
         'thumb_size_step' : 32,
         'file_pattern_list' : ['.*\.JPG$', '.*\.jpg$'],
+        'folder_sort_type' : FOLDER_SORT_TYPE_NEWEST_DATE,
+        'folder_sort_order' : SORT_ORDER_DESCENDING,
       }
 
     def __init__(self, config_file):
