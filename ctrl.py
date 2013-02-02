@@ -11,7 +11,7 @@ class Controller:
   def __init__(self, args):
     self.log = logging.getLogger('root')
     self.args = args
-    self.cfg = config.Config(self.args.config_file)
+    self.cfg = config.GalleryConfig(self.args.config_file)
     
     file_pattern_list = self.cfg.file_pattern_list
     self.dbase = db.Db(self.args.dir_list, file_pattern_list)

@@ -3,31 +3,14 @@ import os
 import logging
 
 class Config:
-    FOLDER_SORT_TYPE_NEWEST_DATE = 'newest_date'
-    FOLDER_SORT_TYPE_OLDEST_DATE = 'oldest_date'
-    SORT_ORDER_ASCENDING = 'ascending'
-    SORT_ORDER_DESCENDING = 'descending'
-    
-    DEFAULT_CONFIG = {
-        'open_image_cmd' : 'xdg-open',
-        'thumb_width_min' : 32,
-        'thumb_height_min' : 32,
-        'thumb_width' : 128,
-        'thumb_height' : 128,
-        'thumb_size_step' : 32,
-        'file_pattern_list' : ['.*\.JPG$', '.*\.jpg$'],
-        'folder_sort_type' : FOLDER_SORT_TYPE_NEWEST_DATE,
-        'folder_sort_order' : SORT_ORDER_DESCENDING,
-      }
-
-    def __init__(self, config_file):
+    def __init__(self, config_file, default_config):
         self.config_file = config_file
         self.log = logging.getLogger('root')
         self.cfg = self._read_config_file()
         if None is self.cfg:
             self.log.info('No config file found, creating default config %s',
                           self.config_file)
-            self.cfg = self.DEFAULT_CONFIG
+            self.cfg = default_config
             self.save_config(self.cfg)
             pass
         # Generate getters for all config properties
@@ -76,3 +59,26 @@ class Config:
         else:
             self.log.error('Config option "%s" not found', key)
             return None
+
+class GalleryConfig(Config):
+    FOLDER_SORT_TYPE_NEWEST_DATE = 'newest_date'
+    FOLDER_SORT_TYPE_OLDEST_DATE = 'oldest_date'
+    SORT_ORDER_ASCENDING = 'ascending'
+    SORT_ORDER_DESCENDING = 'descending'
+    
+    DEFAULT_CONFIG = {
+        'open_image_cmd' : 'xdg-open',
+        'thumb_width_min' : 32,
+        'thumb_height_min' : 32,
+        'thumb_width' : 128,
+        'thumb_height' : 128,
+        'thumb_size_step' : 32,
+        'file_pattern_list' : ['.*\.JPG$', '.*\.jpg$'],
+        'folder_sort_type' : FOLDER_SORT_TYPE_NEWEST_DATE,
+        'folder_sort_order' : SORT_ORDER_DESCENDING,
+      }
+    
+    def __init__(self, config_file):
+        super().__init__(config_file, self.DEFAULT_CONFIG)
+        pass
+
